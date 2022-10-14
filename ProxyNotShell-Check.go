@@ -3,7 +3,11 @@
 // Ref:
 // https://portal.msrc.microsoft.com/en-US/security-guidance/advisory/CVE-2022-41082
 // https://www.kb.cert.org/vuls/id/915563
-// Microsoft Exchange Server 2019, Exchange Server 2016 and Exchange Server 2013 are vulnerable to a // server-side request forgery (SSRF) attack and remote code execution. An authenticated attacker can // use the combination of these two vulnerabilities to elevate privileges and execute arbitrary code // on the target Exchange server.
+// Microsoft Exchange Server 2019, Exchange Server 2016 and Exchange Server 2013 are vulnerable to a 
+// server-side request forgery (SSRF) attack and remote code execution. An authenticated attacker can 
+// use the combination of these two vulnerabilities to elevate privileges and execute arbitrary code 
+// on the target Exchange server.
+
 // User provides an URL. Go code checks if the URL is valid.
 // First: Make request to the vulnerable resource.
 // Checks: 
